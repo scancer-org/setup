@@ -1,0 +1,11 @@
+.DS_Store
+*~
+*.retry
+\#*#
+.vagrant
+.vagrant.backup
+secrets
+venv
+cache
+content
+id_rsa*

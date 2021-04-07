@@ -1,0 +1,116 @@
+---
+- name: Import the GPG key for a custom Postgresql repository
+  become: yes
+  apt_key:
+    url=https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state=present
+
+- name: Add a custom repository for Postgresql
+  become: yes
+  apt_repository:
+    repo='deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main'
+    state=present
+
+- name: Install system packages for the app
+  become: yes
+  apt:
+    name:
+      - build-essential
+      - gettext
+      - python3-dev
+      - python3-virtualenv
+      - zlib1g-dev
+      - libpq-dev
+      - libtiff5-dev
+      - libjpeg8-dev
+      - libfreetype6-dev
+      - liblcms2-dev
+      - libwebp-dev
+      - graphviz-dev
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Create directories to generated and uploaded files
+  become: yes
+  file:
+    path={{ item }}
+    state=directory
+    owner={{ ansible_user }}
+    group={{ ansible_user }}
+  with_items:
+    - /data/data/
+    - /data/log/app/
+    - /data/data/media/
+
+- name: Setup a systemd script for gunicorn
+  become: yes
+  template:
+    src=gunicorn.service.j2
+    dest=/etc/systemd/system/gunicorn.service
+  notify:
+    - restart gunicorn
+  tags:
+    - update
+
+- name: Setup secret environment variables
+  become: yes
+  template:
+    src=secrets.sh.j2
+    dest=/etc/profile.d/secrets.sh
+    mode='0666'
+  tags:
+    - update
+
+- name: Fetch the source code for the app
+  become: yes
+  become_user: "{{ ansible_user }}"
+  git:
+    repo={{ app_repo }}
+    dest={{ app_dir }}
+    version={{ app_branch }}
+    recursive=no
+  notify:
+    - restart gunicorn
+  tags:
+    - update
+
+- name: Install app dependencies via pip
+  become: yes
+  become_user: "{{ ansible_user }}"
+  pip:
+    requirements={{ app_dir }}/requirements/production.txt
+    virtualenv={{ virtualenv_dir }}
+  tags:
+    - update
+    - pip
+
+- name: Collect static files
+  become: yes
+  become_user: "{{ ansible_user }}"
+  django_manage:
+    command="collectstatic --noinput"
+    app_path={{ app_dir }}
+    virtualenv={{ virtualenv_dir }}
+  environment: "{{ env_vars }}"
+  tags:
+    - collectstatic
+    - update
+
+- name: Migrate the database
+  become: yes
+  become_user: "{{ ansible_user }}"
+  django_manage:
+    command=migrate
+    app_path={{ app_dir }}
+    virtualenv={{ virtualenv_dir }}
+  environment: "{{ env_vars }}"
+  tags:
+    - update
+    - db
+
+- name: Configure gunicorn to start on boot
+  become: yes
+  service:
+    name=gunicorn
+    enabled=yes

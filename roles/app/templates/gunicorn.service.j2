@@ -1,0 +1,19 @@
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+{% for key, value in env_vars.items() %}
+Environment="{{ key }}={{ value }}"
+{% endfor %}
+User={{ ansible_user }}
+Group=www-data
+WorkingDirectory={{ app_dir }}
+Restart=always
+RestartSec=5
+ExecStart={{ virtualenv_dir }}/bin/gunicorn --bind 127.0.0.1:8000 --timeout 120 --name gunicornapp --log-file /data/log/app/access.log --limit-request-line 6400 {% if environment == "local" %}--reload{% endif %} {{ app_wsgi }}.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+
+[Install]
+WantedBy=multi-user.target

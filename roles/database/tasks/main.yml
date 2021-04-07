@@ -1,0 +1,103 @@
+---
+- name: Import the GPG key for a custom Postgresql repository
+  become: yes
+  apt_key:
+    url=https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state=present
+
+- name: Add a custom repository for Postgresql
+  become: yes
+  apt_repository:
+    repo='deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main'
+    state=present
+
+- name: Install packages needed for the Postgresql database server
+  become: yes
+  apt:
+    name:
+      - postgresql-13
+      - postgresql-contrib-13
+      - python3-psycopg2
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Create directories to store database data and logs
+  become: yes
+  file:
+    path={{ item }}
+    state=directory
+    owner=postgres
+    group=postgres
+  with_items:
+    - /data/data/database
+    - /data/log/database
+
+- name: Check if database has been initialized
+  become: yes
+  stat: path=/data/data/database/pg_hba.conf
+  register: initial_db
+
+- name: Initialize database directory
+  become: yes
+  become_user: postgres
+  command:  /usr/lib/postgresql/13/bin/initdb --encoding=UTF8 --locale="en_US.UTF-8" -D /data/data/database
+  when: initial_db.stat.exists == False
+
+- name: Stop Postgresql before updating its configuration
+  become: yes
+  service:
+    name: postgresql
+    state: stopped
+  when: initial_db.stat.exists == False
+
+- name: Update the default Postgresql configuration file
+  become: yes
+  template:
+    src=postgresql.conf.j2
+    dest=/etc/postgresql/13/main/postgresql.conf
+    owner=postgres
+    group=postgres
+  notify: restart postgresql
+
+- name: Update the default Postgresql client authentication file
+  become: yes
+  copy:
+    src=pg_hba.conf
+    dest=/etc/postgresql/13/main/pg_hba.conf
+    owner=postgres
+    group=postgres
+    mode=0640
+  notify: restart postgresql
+
+- meta: flush_handlers
+
+- name: Ensure Postgresql is running
+  become: yes
+  service:
+    name: postgresql
+    state: started
+
+- name: Create an initial database user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    user="{{ db_user }}"
+    password="{{ db_password }}"
+    role_attr_flags=CREATEDB,NOSUPERUSER
+
+- name: Create an initial database
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    name="{{ db_name }}"
+    owner="{{ db_user }}"
+    login_host=localhost
+    login_user="{{ db_user }}"
+    login_password="{{ db_password }}"
+
+- name: Configure firewall rules to allow access from local network
+  become: yes
+  ufw: rule=allow src={{ item }}
+  with_items:
+    - 10.0.0.0/8

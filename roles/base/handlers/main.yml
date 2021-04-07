@@ -1,0 +1,6 @@
+---
+- name: restart firewall
+  become: yes
+  service:
+    name=ufw
+    state=restarted

@@ -1,0 +1,55 @@
+---
+- name: Install Redis server
+  become: yes
+  apt:
+    name=redis-server
+    state=latest
+    update_cache=yes
+    cache_valid_time=3600
+  tags:
+    - queue
+
+- name: Create directory to store queue logs
+  become: yes
+  file:
+    path=/data/log/queue
+    state=directory
+    owner=redis
+    group=redis
+  tags:
+    - queue
+
+- name: Update the default Redis configuration file
+  become: yes
+  template:
+    src=redis.conf.j2
+    dest=/etc/redis/redis.conf
+    owner=redis
+    group=redis
+  notify:
+    - restart redis
+  tags:
+    - queue
+
+- name: Ensure Redis is running
+  become: yes
+  service:
+    name: redis-server
+    state: started
+  tags:
+    - queue
+
+- name: Configure Redis to start on boot
+  become: yes
+  service:
+    name=redis-server
+    state=started
+    enabled=yes
+  tags:
+    - queue
+
+- name: Configure firewall rules to allow access from local network
+  become: yes
+  ufw: rule=allow src={{ item }}
+  with_items:
+    - 10.0.0.0/8

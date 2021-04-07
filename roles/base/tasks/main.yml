@@ -1,0 +1,133 @@
+---
+- name: Create swap file
+  become: yes
+  command: fallocate -l {{ 2*ansible_memtotal_mb }}M /swapfile
+           creates=/swapfile
+
+- name: Change swap file permissions
+  become: yes
+  file: path=/swapfile
+        mode=0600
+
+- name: Check swap file type
+  become: yes
+  command: file /swapfile
+  register: swapfile
+  changed_when: False
+
+- name: Start using swap file
+  become: yes
+  command: mkswap /swapfile
+  when: swapfile.stdout.find('swap file') == -1
+
+- name: Commit swap file to fstab
+  become: yes
+  mount:
+    name=none
+    src=/swapfile
+    fstype=swap
+    opts=sw
+    passno=0
+    dump=0
+    state=present
+
+- name: Mount swap
+  become: yes
+  command: swapon /swapfile
+  when: ansible_swaptotal_mb < 1
+  ignore_errors: yes
+
+- name: Install common base packages
+  become: yes
+  apt:
+    name:
+      - fail2ban
+      - emacs-nox
+      - htop
+      - tree
+      - git
+      - screen
+      - ufw
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Create data root
+  become: yes
+  file:
+    path=/data
+    state=directory
+    owner=root
+    group=root
+
+- name: Create directories to store data and logs
+  become: yes
+  file:
+    path={{ item }}
+    state=directory
+    owner=root
+    group=root
+    mode=0775
+  with_items:
+    - /data/data
+    - /data/log
+
+- name: Configure default firewall rules
+  become: yes
+  ufw:
+    direction={{ item.direction }}
+    policy={{ item.policy }}
+  with_items:
+    - { direction: 'incoming', policy: 'deny' }
+    - { direction: 'outgoing', policy: 'allow' }
+
+- name: Configure base firewall rule to allow SSH
+  become: yes
+  ufw:
+    rule: limit
+    name: OpenSSH
+
+- name: Enable firewall logging
+  become: yes
+  ufw: logging=on
+  notify:
+    - restart firewall
+
+- name: Enable firewall
+  become: yes
+  ufw: state=enabled
+
+- name: Copy over SSH public key file
+  become: yes
+  become_user: "{{ ansible_user }}"
+  copy:
+    src=id_rsa.pub
+    dest=/home/{{ ansible_user }}/.ssh/id_rsa.pub
+    mode=0644
+
+- name: Copy over SSH private key file
+  become: yes
+  become_user: "{{ ansible_user }}"
+  copy:
+    src=id_rsa
+    dest=/home/{{ ansible_user }}/.ssh/id_rsa
+    mode=0600
+
+- name: Configure git
+  become: yes
+  become_user: "{{ ansible_user }}"
+  template:
+    src=.gitconfig.j2
+    dest=~/.gitconfig
+
+- name: Ensure github.com is a known host
+  become: yes
+  become_user: "{{ ansible_user }}"
+  lineinfile:
+    dest: /home/{{ ansible_user }}/.ssh/known_hosts
+    create: yes
+    state: present
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+    regexp: "^github\\.com"
+  tags:
+    - update

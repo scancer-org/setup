@@ -1,0 +1,7 @@
+---
+- name: restart gunicorn
+  become: yes
+  service:
+    name=gunicorn
+    state=restarted
+    daemon_reload=yes

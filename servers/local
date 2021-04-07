@@ -1,0 +1,20 @@
+[database]
+192.168.33.16
+
+[queue]
+192.168.33.16
+
+[webapp]
+192.168.33.16
+
+[worker]
+192.168.33.16
+
+[all:vars]
+ansible_ssh_private_key_file = .vagrant/machines/default/virtualbox/private_key
+ansible_python_interpreter = /usr/bin/python3
+ansible_user = vagrant
+environment_vars = secrets/local.yml
+app_branch = main
+app_env = production
+app_domain = scancer-local.org
