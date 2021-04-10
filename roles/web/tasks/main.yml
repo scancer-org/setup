@@ -1,0 +1,104 @@
+---
+- name: Configure firewall rules to allow HTTP(S)
+  become: yes
+  ufw:
+    rule: allow
+    name: Nginx Full
+
+- name: Install certbot
+  become: yes
+  apt:
+    name=python3-certbot-nginx
+    state=latest
+    update_cache=yes
+
+# - name: Generate certificates to enable HTTPS
+#   become: yes
+#   command:
+#     "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ app_domain }} --domain www.{{ app_domain }}"
+
+- name: Check if Diffie-Hellman key exchange parameters exist
+  become: yes
+  stat:
+    path: "{{ app_certificate_dir }}/dhparam.pem"
+  register: dhparam
+
+- name: Create parameters for Diffie-Hellman key exchange
+  become: yes
+  command:
+    "openssl dhparam -out {{ app_certificate_dir }}/dhparam.pem 4096"
+  when: dhparam.stat.exists == False
+
+- name: Add a cron job to renew certificates when close to expiry
+  become: yes
+  cron:
+    name: Renew certificates using certbot
+    job: "certbot renew --quiet"
+    minute: 15
+    hour: 6
+
+- name: Install nginx
+  become: yes
+  apt:
+    name=nginx
+    state=latest
+    update_cache=yes
+
+# - name: Create a directory to store SSL certificates
+#   become: yes
+#   file:
+#     path=/etc/nginx/ssl
+#     state=directory
+
+# - name: Copy over SSL certificates
+#   become: yes
+#   copy:
+#     src={{ item }}
+#     dest=/etc/nginx/ssl/
+#   with_fileglob:
+#     - ssl/*
+
+- name: Create directory to store nginx logs
+  become: yes
+  file:
+    path={{ item }}
+    state=directory
+    owner=www-data
+    group=www-data
+  with_items:
+    - /data/log/web/app
+
+- name: Setup the default configuration for nginx
+  become: yes
+  copy:
+    src=nginx.conf
+    dest=/etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: Delete the default website enabled by nginx
+  become: yes
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: restart nginx
+
+- name: Setup this app as one of the available nginx sites
+  become: yes
+  template:
+    src=site.j2
+    dest=/etc/nginx/sites-available/{{ app_domain }}
+  notify: restart nginx
+
+- name: Setup this app as one of the enabled nginx sites
+  become: yes
+  file:
+    src=/etc/nginx/sites-available/{{ app_domain }}
+    dest=/etc/nginx/sites-enabled/{{ app_domain }}
+    state=link
+  notify: restart nginx
+
+- name: Enable the nginx service
+  become: yes
+  service:
+    name=nginx
+    enabled=yes

@@ -1,0 +1,4 @@
+---
+root_dir: "/home/{{ ansible_user }}"
+app_dir: "{{ root_dir }}/webapp"
+app_certificate_dir: "/etc/letsencrypt/live/{{ app_domain }}"

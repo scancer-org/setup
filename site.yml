@@ -1,0 +1,43 @@
+---
+- name: "Apply base configuration to the server(s)"
+  hosts: all
+  vars_files:
+    - "{{ environment_vars }}"
+  roles:
+    - base
+
+- name: "Configure and deploy database"
+  hosts: database
+  vars_files:
+    - "{{ environment_vars }}"
+  roles:
+    - database
+
+- name: "Configure and deploy message queue"
+  hosts: queue
+  vars_files:
+    - "{{ environment_vars }}"
+  roles:
+    - queue
+
+# - name: "Configure and deploy worker(s)"
+#   hosts: worker
+#   vars_files:
+#     - "{{ environment_vars }}"
+#   roles:
+#     - worker
+
+# - name: "Configure and deploy api"
+#   hosts: api
+#   vars_files:
+#     - "{{ environment_vars }}"
+#   roles:
+#     - api
+
+- name: "Configure and deploy web application"
+  hosts: webapp
+  vars_files:
+    - "{{ environment_vars }}"
+  roles:
+    - app
+    - web
