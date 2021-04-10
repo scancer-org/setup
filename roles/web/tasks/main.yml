@@ -15,18 +15,18 @@
 # - name: Generate certificates to enable HTTPS
 #   become: yes
 #   command:
-#     "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ app_domain }} --domain www.{{ app_domain }}"
+#     "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ domain }} --domain www.{{ domain }}"
 
 - name: Check if Diffie-Hellman key exchange parameters exist
   become: yes
   stat:
-    path: "{{ app_certificate_dir }}/dhparam.pem"
+    path: "{{ certificate_dir }}/dhparam.pem"
   register: dhparam
 
 - name: Create parameters for Diffie-Hellman key exchange
   become: yes
   command:
-    "openssl dhparam -out {{ app_certificate_dir }}/dhparam.pem 4096"
+    "openssl dhparam -out {{ certificate_dir }}/dhparam.pem 4096"
   when: dhparam.stat.exists == False
 
 - name: Add a cron job to renew certificates when close to expiry
@@ -61,12 +61,10 @@
 - name: Create directory to store nginx logs
   become: yes
   file:
-    path={{ item }}
+    path={{ log_dir }}
     state=directory
     owner=www-data
     group=www-data
-  with_items:
-    - /data/log/web/app
 
 - name: Setup the default configuration for nginx
   become: yes
@@ -85,15 +83,15 @@
 - name: Setup this app as one of the available nginx sites
   become: yes
   template:
-    src=site.j2
-    dest=/etc/nginx/sites-available/{{ app_domain }}
+    src={{ name }}.j2
+    dest=/etc/nginx/sites-available/{{ domain }}
   notify: restart nginx
 
 - name: Setup this app as one of the enabled nginx sites
   become: yes
   file:
-    src=/etc/nginx/sites-available/{{ app_domain }}
-    dest=/etc/nginx/sites-enabled/{{ app_domain }}
+    src=/etc/nginx/sites-available/{{ domain }}
+    dest=/etc/nginx/sites-enabled/{{ domain }}
     state=link
   notify: restart nginx
 

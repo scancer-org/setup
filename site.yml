@@ -39,5 +39,11 @@
   vars_files:
     - "{{ environment_vars }}"
   roles:
-    - app
-    - web
+    - role: app
+    - role: web
+      vars:
+        name: app
+        domain: "{{ app_domain }}"
+        dir:  "/home/{{ ansible_user }}/webapp"
+
+

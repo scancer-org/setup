@@ -1,4 +1,4 @@
-upstream app {
+upstream {{ name }} {
   server 127.0.0.1:8000 fail_timeout=0;
 }
 
@@ -12,8 +12,8 @@ server {
   # ssl_certificate /etc/nginx/ssl/local.crt;
   # ssl_certificate_key /etc/nginx/ssl/local.key;
 
-  ssl_certificate {{ app_certificate_dir }}/fullchain.pem;
-  ssl_certificate_key {{ app_certificate_dir }}/privkey.pem;
+  ssl_certificate {{ certificate_dir }}/fullchain.pem;
+  ssl_certificate_key {{ certificate_dir }}/privkey.pem;
 
   access_log off;
   error_log off;
@@ -24,22 +24,22 @@ server {
 }
 
 server {
-  server_name {{ app_domain }};
+  server_name {{ domain }};
 
   listen *:80;
   listen [::]:80 ipv6only=on;
 
-  return 301 https://{{ app_domain }}$request_uri;
+  return 301 https://{{ domain }}$request_uri;
 }
 
 server {
-  server_name {{ app_domain }};
+  server_name {{ domain }};
 
   listen *:443 ssl;
   listen [::]:443 ipv6only=on ssl;
 
-  access_log /data/log/web/app/access.log;
-  error_log /data/log/web/app/error.log;
+  access_log {{ log_dir }}/access.log;
+  error_log {{ log_dir }}/error.log;
 
   charset utf-8;
   client_max_body_size 400M;
@@ -47,13 +47,13 @@ server {
   # ssl_certificate /etc/nginx/ssl/local.crt;
   # ssl_certificate_key /etc/nginx/ssl/local.key;
 
-  ssl_certificate {{ app_certificate_dir }}/fullchain.pem;
-  ssl_certificate_key {{ app_certificate_dir }}/privkey.pem;
+  ssl_certificate {{ certificate_dir }}/fullchain.pem;
+  ssl_certificate_key {{ certificate_dir }}/privkey.pem;
 
   ssl_session_timeout 1d;
   ssl_session_cache shared:SSL:50m;
 
-  ssl_dhparam {{ app_certificate_dir }}/dhparam.pem;
+  ssl_dhparam {{ certificate_dir }}/dhparam.pem;
 
   ssl_protocols TLSv1.2;
   ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256';
@@ -72,7 +72,7 @@ server {
   add_header Strict-Transport-Security max-age=31536000;
 
   location /static {
-    alias {{ app_dir }}/staticfiles;
+    alias {{ dir }}/staticfiles;
     expires 365d;
   }
 
@@ -81,10 +81,10 @@ server {
   }
 
   location / {
-    try_files $uri @proxy_to_app;
+    try_files $uri @proxy_to_{{ name }};
   }
 
-  location @proxy_to_app {
+  location @proxy_to_{{ name }} {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto https;
     proxy_set_header Host $http_host;
@@ -92,6 +92,6 @@ server {
     proxy_read_timeout 120s;
     proxy_send_timeout 120s;
     proxy_redirect off;
-    proxy_pass http://app;
+    proxy_pass http://{{ name }};
   }
 }
