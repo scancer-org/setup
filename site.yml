@@ -27,6 +27,24 @@
 #   roles:
 #     - worker
 
+- name: "Configure and deploy the webapp"
+  hosts: webapp
+  vars_files:
+    - "{{ environment_vars }}"
+  roles:
+    - app
+
+- name: "Configure and nginx reverse proxy for the webapp"
+  hosts: webapp
+  vars_files:
+    - "{{ environment_vars }}"
+  roles:
+    - role: web
+      vars:
+        name: app
+        domain: "{{ app_domain }}"
+        dir:  "/home/{{ ansible_user }}/webapp"
+
 # - name: "Configure and deploy api"
 #   hosts: api
 #   vars_files:
@@ -34,16 +52,15 @@
 #   roles:
 #     - api
 
-- name: "Configure and deploy web application"
-  hosts: webapp
+- name: "Configure and nginx reverse proxy for the API"
+  hosts: webapi
   vars_files:
     - "{{ environment_vars }}"
   roles:
-    - role: app
     - role: web
       vars:
-        name: app
-        domain: "{{ app_domain }}"
-        dir:  "/home/{{ ansible_user }}/webapp"
+        name: api
+        domain: "{{ api_domain }}"
+        dir:  "/home/{{ ansible_user }}/api"
 
 

@@ -7,6 +7,9 @@
 [webapp]
 192.168.33.16
 
+[webapi]
+192.168.33.16
+
 [worker]
 192.168.33.16
 
@@ -18,3 +21,4 @@ environment_vars = secrets/local.yml
 app_branch = main
 app_env = production
 app_domain = scancer-local.org
+api_domain = api.scancer-local.org
