@@ -7,14 +7,15 @@ In the VM:
    ````
    mkdir api
    cd api
-   git@github.com:pytorch/serve.git
+   git clone git@github.com:pytorch/serve.git
    cd serve
    ````
 
 3. Install TorchServe and its dependencies
    ````
-   apt-get install python3-venv
+   sudo apt-get install python3-venv
    python3 -m venv venv
+   source venv/bin/activate
    # Fix up ts_scripts/install_dependencies.py to remove conda stuff
    python ./ts_scripts/install_dependencies.py
    pip install torchserve torch-model-archiver
