@@ -47,7 +47,10 @@ If you add the following entry to your local DNS (which is
 `/etc/hosts` on macOS and Linux),
 
 ````
-192.168.33.16	scancer-local.org
+192.168.33.16   www.scancer-local.org
+192.168.33.16   scancer-local.org
+192.168.33.16   api.scancer-local.org
+192.168.33.16   models.scancer-local.org
 ````
 
 you should be able to navigate to `scancer-local.org` and see the site
