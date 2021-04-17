@@ -1,0 +1,7 @@
+---
+- name: restart torchserve
+  become: yes
+  service:
+    name=torchserve
+    state=restarted
+    daemon_reload=yes

@@ -26,8 +26,8 @@
     dest={{ api_dir }}/serve
     version={{ api_branch }}
     recursive=no
-  # notify:
-  #   - restart torchserve
+  notify:
+    - restart torchserve
 
 - name: Install API dependencies via pip
   pip:
@@ -41,17 +41,17 @@
       - torchserve
       - torch-model-archiver
 
-# - name: Setup a systemd script for the API
-#   become: yes
-#   template:
-#     src=torchserve.service.j2
-#     dest=/etc/systemd/system/torchserve.service
-#   notify:
-#     - restart torchserve
+- name: Setup a systemd script for the API
+  become: yes
+  template:
+    src=torchserve.service.j2
+    dest=/etc/systemd/system/torchserve.service
+  notify:
+    - restart torchserve
 
-# - name: Configure the API to start on boot
-#   become: yes
-#   service:
-#     name=torchserve
-#     enabled=yes
+- name: Configure the API to start on boot
+  become: yes
+  service:
+    name=torchserve
+    enabled=yes
 
