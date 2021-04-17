@@ -20,6 +20,4 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     ansible.limit = "all"
   end
 
-  config.vm.provision "shell", inline: "systemctl start gunicorn", run: "always"
-
 end
