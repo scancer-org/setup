@@ -17,9 +17,8 @@ scancer.org
 ansible_python_interpreter = /usr/bin/python3
 ansible_user = ubuntu
 environment_vars = group_vars/secrets/production.yml
+app_domain = scancer.org
 app_branch = main
 app_env = production
 api_env = production
-app_domain = scancer.org
-api_domain = api.scancer.org
 use_certbot = True

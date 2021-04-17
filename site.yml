@@ -61,6 +61,13 @@
       vars:
         name: api
         domain: "{{ api_domain }}"
-        dir:  "/home/{{ ansible_user }}/api"
 
-
+- name: "Configure and nginx reverse proxy for the model store"
+  hosts: webapi
+  vars_files:
+    - "{{ environment_vars }}"
+  roles:
+    - role: web
+      vars:
+        name: model_store
+        domain: "{{ model_store_domain }}"
