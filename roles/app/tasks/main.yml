@@ -49,8 +49,6 @@
     dest=/etc/systemd/system/gunicorn.service
   notify:
     - restart gunicorn
-  tags:
-    - update
 
 - name: Setup secret environment variables
   become: yes
@@ -58,8 +56,6 @@
     src=secrets.sh.j2
     dest=/etc/profile.d/secrets.sh
     mode='0666'
-  tags:
-    - update
 
 - name: Fetch the source code for the app
   become: yes
@@ -71,18 +67,13 @@
     recursive=no
   notify:
     - restart gunicorn
-  tags:
-    - update
 
 - name: Install app dependencies via pip
   become: yes
   become_user: "{{ ansible_user }}"
   pip:
-    requirements={{ app_dir }}/requirements/production.txt
-    virtualenv={{ virtualenv_dir }}
-  tags:
-    - update
-    - pip
+    requirements={{ app_dir }}/requirements/{{ app_env }}.txt
+    virtualenv={{ app_virtualenv_dir }}
 
 - name: Collect static files
   become: yes
@@ -90,11 +81,8 @@
   django_manage:
     command="collectstatic --noinput"
     app_path={{ app_dir }}
-    virtualenv={{ virtualenv_dir }}
+    virtualenv={{ app_virtualenv_dir }}
   environment: "{{ env_vars }}"
-  tags:
-    - collectstatic
-    - update
 
 - name: Migrate the database
   become: yes
@@ -102,11 +90,8 @@
   django_manage:
     command=migrate
     app_path={{ app_dir }}
-    virtualenv={{ virtualenv_dir }}
+    virtualenv={{ app_virtualenv_dir }}
   environment: "{{ env_vars }}"
-  tags:
-    - update
-    - db
 
 - name: Configure gunicorn to start on boot
   become: yes

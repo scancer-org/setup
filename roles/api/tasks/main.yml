@@ -1,0 +1,57 @@
+---
+- name: Install system packages for the API
+  become: yes
+  apt:
+    name:
+      - openjdk-11-jdk
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Create directories to hold the API and its generated files
+  become: yes
+  file:
+    path={{ item }}
+    state=directory
+    owner={{ ansible_user }}
+    group={{ ansible_user }}
+  with_items:
+    - "{{ api_dir }}"
+    - /data/log/api/
+    - /data/data/model_store/
+
+- name: Fetch the source code for the API
+  git:
+    repo={{ api_repo }}
+    dest={{ api_dir }}/serve
+    version={{ api_branch }}
+    recursive=no
+  # notify:
+  #   - restart torchserve
+
+- name: Install API dependencies via pip
+  pip:
+    virtualenv={{ api_virtualenv_dir }}
+    requirements={{ api_dir }}/serve/requirements/{{ api_env }}.txt
+
+- name: Install the API
+  pip:
+    virtualenv: "{{ api_virtualenv_dir }}"
+    name:
+      - torchserve
+      - torch-model-archiver
+
+# - name: Setup a systemd script for the API
+#   become: yes
+#   template:
+#     src=torchserve.service.j2
+#     dest=/etc/systemd/system/torchserve.service
+#   notify:
+#     - restart torchserve
+
+# - name: Configure the API to start on boot
+#   become: yes
+#   service:
+#     name=torchserve
+#     enabled=yes
+

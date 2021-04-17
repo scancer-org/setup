@@ -19,6 +19,7 @@ ansible_user = ubuntu
 environment_vars = secrets/production.yml
 app_branch = main
 app_env = production
+api_env = production
 app_domain = scancer.org
 api_domain = api.scancer.org
 use_certbot = True

@@ -1,7 +1,7 @@
 ---
 root_dir: "/home/{{ ansible_user }}"
 app_dir: "{{ root_dir }}/webapp"
-virtualenv_dir: "{{ app_dir }}/venv"
+app_virtualenv_dir: "{{ app_dir }}/venv"
 app_repo: ssh://git@github.com/scancer-org/webapp.git
 app_wsgi: config
 env_vars: {

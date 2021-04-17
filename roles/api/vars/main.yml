@@ -1,0 +1,6 @@
+---
+root_dir: "/home/{{ ansible_user }}"
+api_dir: "{{ root_dir }}/api"
+api_virtualenv_dir: "{{ api_dir }}/venv"
+api_repo: git@github.com:pytorch/serve.git
+api_branch: master

@@ -20,6 +20,7 @@ ansible_user = vagrant
 environment_vars = secrets/local.yml
 app_branch = main
 app_env = production
+api_env = production
 app_domain = scancer-local.org
 api_domain = api.scancer-local.org
 use_certbot = False
