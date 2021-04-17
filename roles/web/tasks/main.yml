@@ -1,9 +1,56 @@
 ---
+- name: Install nginx
+  become: yes
+  apt:
+    name=nginx
+    state=latest
+    update_cache=yes
+
+- name: Setup the default configuration for nginx
+  become: yes
+  copy:
+    src=nginx.conf
+    dest=/etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: Create directory to store nginx logs
+  become: yes
+  file:
+    path={{ log_dir }}
+    state=directory
+    owner=www-data
+    group=www-data
+
+- name: Delete the default website enabled by nginx
+  become: yes
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: restart nginx
+
 - name: Configure firewall rules to allow HTTP(S)
   become: yes
   ufw:
     rule: allow
     name: Nginx Full
+
+- name: Create a directory to store SSL certificates
+  become: yes
+  file:
+    path={{ certificate_dir }}
+    state=directory
+    owner=root
+    group=root
+    mode="u=rwx,g=x,o=x"
+
+- name: Copy over SSL certificates
+  become: yes
+  copy:
+    src={{ item }}
+    dest={{ certificate_dir }}
+  with_fileglob:
+    - ssl/*
+  when: not use_certbot
 
 - name: Install certbot
   become: yes
@@ -11,11 +58,13 @@
     name=python3-certbot-nginx
     state=latest
     update_cache=yes
+  when: use_certbot
 
-# - name: Generate certificates to enable HTTPS
-#   become: yes
-#   command:
-#     "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ domain }} --domain www.{{ domain }}"
+- name: Generate certificates to enable HTTPS
+  become: yes
+  command:
+    "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ domain }} --domain www.{{ domain }}"
+  when: use_certbot
 
 - name: Check if Diffie-Hellman key exchange parameters exist
   become: yes
@@ -36,49 +85,7 @@
     job: "certbot renew --quiet"
     minute: 15
     hour: 6
-
-- name: Install nginx
-  become: yes
-  apt:
-    name=nginx
-    state=latest
-    update_cache=yes
-
-# - name: Create a directory to store SSL certificates
-#   become: yes
-#   file:
-#     path=/etc/nginx/ssl
-#     state=directory
-
-# - name: Copy over SSL certificates
-#   become: yes
-#   copy:
-#     src={{ item }}
-#     dest=/etc/nginx/ssl/
-#   with_fileglob:
-#     - ssl/*
-
-- name: Create directory to store nginx logs
-  become: yes
-  file:
-    path={{ log_dir }}
-    state=directory
-    owner=www-data
-    group=www-data
-
-- name: Setup the default configuration for nginx
-  become: yes
-  copy:
-    src=nginx.conf
-    dest=/etc/nginx/nginx.conf
-  notify: restart nginx
-
-- name: Delete the default website enabled by nginx
-  become: yes
-  file:
-    path: /etc/nginx/sites-enabled/default
-    state: absent
-  notify: restart nginx
+  when: use_certbot
 
 - name: Setup this app as one of the available nginx sites
   become: yes

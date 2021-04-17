@@ -9,9 +9,6 @@ server {
   listen 80 default_server;
   listen *:443 ssl;
 
-  # ssl_certificate /etc/nginx/ssl/local.crt;
-  # ssl_certificate_key /etc/nginx/ssl/local.key;
-
   ssl_certificate {{ certificate_dir }}/fullchain.pem;
   ssl_certificate_key {{ certificate_dir }}/privkey.pem;
 
@@ -43,9 +40,6 @@ server {
 
   charset utf-8;
   client_max_body_size 400M;
-
-  # ssl_certificate /etc/nginx/ssl/local.crt;
-  # ssl_certificate_key /etc/nginx/ssl/local.key;
 
   ssl_certificate {{ certificate_dir }}/fullchain.pem;
   ssl_certificate_key {{ certificate_dir }}/privkey.pem;
