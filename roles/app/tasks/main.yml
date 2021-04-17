@@ -40,7 +40,7 @@
     group={{ ansible_user }}
   with_items:
     - /data/log/app/
-    - /data/data/media/
+    - "{{ data_dir }}/media/"
 
 - name: Setup a systemd script for gunicorn
   become: yes

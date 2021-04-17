@@ -69,7 +69,7 @@
     group=root
     mode=0775
   with_items:
-    - /data/data
+    - "{{ data_dir }}"
     - /data/log
 
 - name: Configure default firewall rules

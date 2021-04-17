@@ -10,7 +10,7 @@ Environment="LOG_LOCATION=/data/log/api"
 WorkingDirectory={{ api_dir }}
 Restart=always
 RestartSec=5
-ExecStart={{ api_virtualenv_dir }}/bin/torchserve --start --no-config-snapshots --model-store /data/data/model_store
+ExecStart={{ api_virtualenv_dir }}/bin/torchserve --start --no-config-snapshots --model-store {{ data_dir }}/model_store
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop={{ api_virtualenv_dir }}/bin/torchserve --stop
 

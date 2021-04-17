@@ -71,7 +71,7 @@ server {
   }
 
   location /media {
-    alias /data/data/media;
+    alias {{ data_dir }}/media;
   }
 
   location / {

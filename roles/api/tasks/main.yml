@@ -18,7 +18,7 @@
   with_items:
     - "{{ api_dir }}"
     - /data/log/api/
-    - /data/data/model_store/
+    - "{{ data_dir }}/model_store/"
 
 - name: Fetch the source code for the API
   git:
