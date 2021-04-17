@@ -1,3 +1,3 @@
 ---
-log_dir: "/data/log/web/{{ name }}"
+web_log_dir: "{{ log_dir }}/web/{{ name }}"
 certificate_dir: "/etc/letsencrypt/live/{{ domain }}"

@@ -324,7 +324,7 @@ effective_cache_size = {{ (12160.0/59374.0*(ansible_memtotal_mb - 1024))|round|i
 					# (change requires restart)
 
 # These are only used if logging_collector is on:
-log_directory = '/data/log/database'		# directory where log files are written,
+log_directory = '{{ log_dir }}/database'		# directory where log files are written,
 					# can be absolute or relative to PGDATA
 #log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'	# log file name pattern,
 					# can include strftime() escapes

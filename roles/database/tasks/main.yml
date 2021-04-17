@@ -31,7 +31,7 @@
     group=postgres
   with_items:
     - "{{ data_dir }}/database"
-    - /data/log/database
+    - "{{ log_dir }}/database"
 
 - name: Check if database has been initialized
   become: yes

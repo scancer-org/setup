@@ -16,7 +16,7 @@
 - name: Create directory to store nginx logs
   become: yes
   file:
-    path={{ log_dir }}
+    path={{ web_log_dir }}
     state=directory
     owner=www-data
     group=www-data

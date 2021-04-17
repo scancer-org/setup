@@ -1,3 +1,4 @@
 ---
 storage_dir: /data
 data_dir: "{{ storage_dir }}/data"
+log_dir: "{{ storage_dir }}/log"

@@ -15,8 +15,8 @@ server {
 
   listen *:443 ssl;
 
-  access_log {{ log_dir }}/access.log;
-  error_log {{ log_dir }}/error.log;
+  access_log {{ web_log_dir }}/access.log;
+  error_log {{ web_log_dir }}/error.log;
 
   charset utf-8;
   client_max_body_size 400M;

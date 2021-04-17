@@ -6,7 +6,7 @@ After=network.target
 Type=forking
 User={{ ansible_user }}
 Group=www-data
-Environment="LOG_LOCATION=/data/log/api"
+Environment="LOG_LOCATION={{ log_dir }}/api"
 WorkingDirectory={{ api_dir }}
 Restart=always
 RestartSec=5

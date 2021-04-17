@@ -12,7 +12,7 @@
 - name: Create directory to store queue logs
   become: yes
   file:
-    path=/data/log/queue
+    path={{ log_dir }}/queue
     state=directory
     owner=redis
     group=redis

@@ -11,7 +11,7 @@ Group=www-data
 WorkingDirectory={{ app_dir }}
 Restart=always
 RestartSec=5
-ExecStart={{ app_virtualenv_dir }}/bin/gunicorn --bind 127.0.0.1:8000 --timeout 120 --name gunicornapp --log-file /data/log/app/access.log --limit-request-line 6400 {% if environment == "local" %}--reload{% endif %} {{ app_wsgi }}.wsgi:application
+ExecStart={{ app_virtualenv_dir }}/bin/gunicorn --bind 127.0.0.1:8000 --timeout 120 --name gunicornapp --log-file {{ log_dir }}/app/access.log --limit-request-line 6400 {% if environment == "local" %}--reload{% endif %} {{ app_wsgi }}.wsgi:application
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 

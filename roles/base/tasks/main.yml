@@ -70,7 +70,7 @@
     mode=0775
   with_items:
     - "{{ data_dir }}"
-    - /data/log
+    - "{{ log_dir }}"
 
 - name: Configure default firewall rules
   become: yes
