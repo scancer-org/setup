@@ -17,7 +17,7 @@
 ansible_ssh_private_key_file = .vagrant/machines/default/virtualbox/private_key
 ansible_python_interpreter = /usr/bin/python3
 ansible_user = vagrant
-environment_vars = secrets/local.yml
+environment_vars = group_vars/secrets/local.yml
 app_branch = main
 app_env = production
 api_env = production

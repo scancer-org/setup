@@ -16,7 +16,7 @@ scancer.org
 [all:vars]
 ansible_python_interpreter = /usr/bin/python3
 ansible_user = ubuntu
-environment_vars = secrets/production.yml
+environment_vars = group_vars/secrets/production.yml
 app_branch = main
 app_env = production
 api_env = production
