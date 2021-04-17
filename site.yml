@@ -45,12 +45,12 @@
         domain: "{{ app_domain }}"
         dir:  "/home/{{ ansible_user }}/webapp"
 
-# - name: "Configure and deploy api"
-#   hosts: api
-#   vars_files:
-#     - "{{ environment_vars }}"
-#   roles:
-#     - api
+- name: "Configure and deploy api"
+  hosts: webapi
+  vars_files:
+    - "{{ environment_vars }}"
+  roles:
+    - api
 
 - name: "Configure and nginx reverse proxy for the API"
   hosts: webapi
