@@ -50,13 +50,6 @@
   notify:
     - restart gunicorn
 
-- name: Setup secret environment variables
-  become: yes
-  template:
-    src=secrets.sh.j2
-    dest=/etc/profile.d/secrets.sh
-    mode='0666'
-
 - name: Fetch the source code for the app
   become: yes
   become_user: "{{ ansible_user }}"
