@@ -9,3 +9,4 @@ venv
 cache
 content
 id_rsa*
+basic_auth_password

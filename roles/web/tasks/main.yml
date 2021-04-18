@@ -52,6 +52,12 @@
     - ssl/*
   when: not use_certbot
 
+- name: Copy over basic auth password file
+  become: yes
+  copy:
+    src=basic_auth_password
+    dest=/etc/nginx/basic_auth_password
+
 - name: Install certbot
   become: yes
   apt:

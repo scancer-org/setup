@@ -15,6 +15,9 @@ server {
 
   listen *:443 ssl;
 
+  auth_basic "ML Ops Area";
+  auth_basic_user_file /etc/nginx/basic_auth_password;
+
   access_log {{ web_log_dir }}/access.log;
   error_log {{ web_log_dir }}/error.log;
 
