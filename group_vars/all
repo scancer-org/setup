@@ -3,4 +3,4 @@ storage_dir: /data
 data_dir: "{{ storage_dir }}/data"
 log_dir: "{{ storage_dir }}/log"
 api_domain: "api.{{ app_domain }}"
-model_store_domain: "models.{{ app_domain }}"
+model_store_domain: "model-store.{{ app_domain }}"

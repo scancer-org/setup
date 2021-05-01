@@ -33,13 +33,18 @@
   pip:
     virtualenv={{ api_virtualenv_dir }}
     requirements={{ api_dir }}/serve/requirements/{{ api_env }}.txt
+  notify:
+    - restart torchserve
 
 - name: Install the API
   pip:
     virtualenv: "{{ api_virtualenv_dir }}"
     name:
+      - torchvision
       - torchserve
       - torch-model-archiver
+  notify:
+    - restart torchserve
 
 - name: Setup a systemd script for the API
   become: yes
