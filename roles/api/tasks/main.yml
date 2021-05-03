@@ -4,6 +4,7 @@
   apt:
     name:
       - openjdk-11-jdk
+      - openslide-tools
     state: latest
     update_cache: yes
     cache_valid_time: 3600
@@ -40,9 +41,19 @@
   pip:
     virtualenv: "{{ api_virtualenv_dir }}"
     name:
-      - torchvision
       - torchserve
       - torch-model-archiver
+  notify:
+    - restart torchserve
+
+- name: Install dependencies for models served by the API
+  pip:
+    virtualenv: "{{ api_virtualenv_dir }}"
+    name:
+      - torch
+      - torchvision
+      - torchtext
+      - torchaudio
   notify:
     - restart torchserve
 
