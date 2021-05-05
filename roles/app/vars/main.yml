@@ -13,6 +13,4 @@ env_vars: {
   DATABASE_URL: "postgres://{{ db_user }}:{{ db_password }}@{{ hostvars[groups['database'][0]].ansible_default_ipv4.address }}:{{ db_port }}/{{ db_name }}",
   REDIS_URL: "redis://todo/",
   CELERY_BROKER_URL: "todo",
-  MAILJET_API_KEY: "{{ mailjet_api_key }}",
-  MAILJET_SECRET_KEY: "{{ mailjet_secret_key }}"
 }
