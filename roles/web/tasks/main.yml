@@ -45,7 +45,7 @@
 - name: Generate certificates to enable HTTPS
   become: yes
   command:
-    "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ domain }} --domain www.{{ domain }}"
+    "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --cert-name {{ domain }} --domain {{ domain }} --domain www.{{ domain }}"
   when: use_certbot
 
 - name: Create a directory to store SSL certificates (when not using certbot)
@@ -78,8 +78,7 @@
   become: yes
   command:
     "openssl dhparam -out {{ ssl_dhparam }} 4096"
-  when: dhparam.stat.exists == False
-  when: not use_certbot
+  when: (not use_certbot) and (dhparam.stat.exists == False)
 
 - name: Copy over basic auth password file
   become: yes
