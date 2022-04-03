@@ -42,11 +42,11 @@
     update_cache=yes
   when: use_certbot
 
-# - name: Generate certificates to enable HTTPS
-#   become: yes
-#   command:
-#     "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ domain }} --domain www.{{ domain }}"
-#   when: use_certbot
+- name: Generate certificates to enable HTTPS
+  become: yes
+  command:
+    "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ domain }} --domain www.{{ domain }}"
+  when: use_certbot
 
 - name: Create a directory to store SSL certificates (when not using certbot)
   become: yes
