@@ -66,11 +66,11 @@
     update_cache=yes
   when: use_certbot
 
-- name: Generate certificates to enable HTTPS
-  become: yes
-  command:
-    "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ domain }} --domain www.{{ domain }}"
-  when: use_certbot
+# - name: Generate certificates to enable HTTPS
+#   become: yes
+#   command:
+#     "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ domain }} --domain www.{{ domain }}"
+#   when: use_certbot
 
 - name: Check if Diffie-Hellman key exchange parameters exist
   become: yes
@@ -78,11 +78,11 @@
     path: "{{ certificate_dir }}/dhparam.pem"
   register: dhparam
 
-- name: Create parameters for Diffie-Hellman key exchange
-  become: yes
-  command:
-    "openssl dhparam -out {{ certificate_dir }}/dhparam.pem 4096"
-  when: dhparam.stat.exists == False
+# - name: Create parameters for Diffie-Hellman key exchange
+#   become: yes
+#   command:
+#     "openssl dhparam -out {{ certificate_dir }}/dhparam.pem 4096"
+#   when: dhparam.stat.exists == False
 
 - name: Add a cron job to renew certificates when close to expiry
   become: yes

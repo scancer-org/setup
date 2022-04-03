@@ -9,8 +9,8 @@ env_vars: {
   DJANGO_SETTINGS_MODULE: "config.settings.{{ app_env }}",
   DJANGO_SECRET_KEY: "{{ app_secret_key }}",
   DJANGO_ALLOWED_HOSTS: "{{ app_domain }}",
-  DJANGO_ADMIN_URL: "backend",
-  DATABASE_URL: "postgres://{{ db_user }}:{{ db_password }}@{{ hostvars[groups['database'][0]].ansible_default_ipv4.address }}:{{ db_port }}/{{ db_name }}",
+  DJANGO_ADMIN_URL: "backend/",
+  DATABASE_URL: "postgres://{{ db_user }}:{{ db_password }}@localhost:{{ db_port }}/{{ db_name }}",
   REDIS_URL: "redis://todo/",
   CELERY_BROKER_URL: "todo",
 }
