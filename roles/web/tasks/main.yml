@@ -34,30 +34,6 @@
     rule: allow
     name: Nginx Full
 
-- name: Create a directory to store SSL certificates
-  become: yes
-  file:
-    path={{ certificate_dir }}
-    state=directory
-    owner=root
-    group=root
-    mode="u=rwx,g=x,o=x"
-
-- name: Copy over SSL certificates
-  become: yes
-  copy:
-    src={{ item }}
-    dest={{ certificate_dir }}
-  with_fileglob:
-    - ssl/*
-  when: not use_certbot
-
-- name: Copy over basic auth password file
-  become: yes
-  copy:
-    src=basic_auth_password
-    dest=/etc/nginx/basic_auth_password
-
 - name: Install certbot
   become: yes
   apt:
@@ -72,26 +48,44 @@
 #     "certbot certonly --nginx --non-interactive --agree-tos --email {{ email }} --keep-until-expiring --domain {{ domain }} --domain www.{{ domain }}"
 #   when: use_certbot
 
-- name: Check if Diffie-Hellman key exchange parameters exist
+- name: Create a directory to store SSL certificates (when not using certbot)
+  become: yes
+  file:
+    path={{ certificate_dir }}
+    state=directory
+    owner=root
+    group=root
+    mode="u=rwx,g=x,o=x"
+  when: not use_certbot
+
+- name: Copy over SSL certificates (when not using certbot)
+  become: yes
+  copy:
+    src={{ item }}
+    dest={{ certificate_dir }}
+  with_fileglob:
+    - ssl/*
+  when: not use_certbot
+
+- name: Check if Diffie-Hellman key exchange parameters exist (when not using certbot)
   become: yes
   stat:
-    path: "{{ certificate_dir }}/dhparam.pem"
+    path: "{{ ssl_dhparam }}"
   register: dhparam
+  when: not use_certbot
 
-# - name: Create parameters for Diffie-Hellman key exchange
-#   become: yes
-#   command:
-#     "openssl dhparam -out {{ certificate_dir }}/dhparam.pem 4096"
-#   when: dhparam.stat.exists == False
-
-- name: Add a cron job to renew certificates when close to expiry
+- name: Create parameters for Diffie-Hellman key exchange (when not using certbot)
   become: yes
-  cron:
-    name: Renew certificates using certbot
-    job: "certbot renew --quiet"
-    minute: 15
-    hour: 6
-  when: use_certbot
+  command:
+    "openssl dhparam -out {{ ssl_dhparam }} 4096"
+  when: dhparam.stat.exists == False
+  when: not use_certbot
+
+- name: Copy over basic auth password file
+  become: yes
+  copy:
+    src=basic_auth_password
+    dest=/etc/nginx/basic_auth_password
 
 - name: Setup this app as one of the available nginx sites
   become: yes
@@ -107,6 +101,15 @@
     dest=/etc/nginx/sites-enabled/{{ domain }}
     state=link
   notify: restart nginx
+
+- name: Add a cron job to renew certificates when close to expiry
+  become: yes
+  cron:
+    name: Renew certificates using certbot
+    job: "certbot renew --quiet"
+    minute: 15
+    hour: 6
+  when: use_certbot
 
 - name: Enable the nginx service
   become: yes
