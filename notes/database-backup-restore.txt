@@ -1,0 +1,3 @@
+pg_dump -h localhost -U scancer -p 5432 -Fc scancer > scancer.pgsql
+[Make sure a clean, empty database exists]
+pg_restore -h localhost -p 5432 -U scancer -d scancer scancer.pgsql
