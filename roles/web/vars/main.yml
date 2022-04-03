@@ -1,3 +1,4 @@
 ---
 web_log_dir: "{{ log_dir }}/web/{{ name }}"
 certificate_dir: "/etc/letsencrypt/live/{{ domain }}"
+ssl_dhparam: "/etc/letsencrypt/ssl-dhparams.pem"
